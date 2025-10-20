@@ -1,12 +1,12 @@
 {
-  "name": "electron-react-boilerplate",
-  "version": "4.6.0",
-  "description": "A foundation for scalable desktop apps",
+  "name": "net-topology-connect",
+  "version": "0.0.1",
+  "description": "Network topology connection tool",
   "license": "MIT",
   "author": {
-    "name": "Electron React Boilerplate Maintainers",
-    "email": "electronreactboilerplate@gmail.com",
-    "url": "https://github.com/electron-react-boilerplate"
+    "name": "chensh",
+    "email": "421190919@qq.com",
+    "url": "https://github.com/chenshanhe"
   },
   "main": "./dist/main/main.js",
   "scripts": {
