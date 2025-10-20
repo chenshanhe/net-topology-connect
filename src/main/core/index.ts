@@ -1,5 +1,7 @@
 import { ConfigManager } from '../utils/config';
 import { ModuleManager } from './moduleManager/index';
+import { DatabaseManager } from '../database/DatabaseManager';
+
 import { initLogger, createLogger } from '../utils/logger';
 import { ipcMain } from 'electron';
 
@@ -8,13 +10,13 @@ let moduleManager = ModuleManager.getInstance();
 
 let logger: any = null;
 
-export const init = () => {
-  appInit();
+export const init = async () => {
+  await appInit();
   eventInit();
   ipcInit();
 };
 
-export const appInit = () => {
+export const appInit = async () => {
   try {
     // 初始化配置
     configManager.init();
@@ -24,6 +26,11 @@ export const appInit = () => {
     const loggerConfig = configManager.getLoggerConfig();
     initLogger(loggerConfig);
     moduleManager.moduleInitialized('logger');
+
+    // 初始化数据库
+    let databaseManager = DatabaseManager.getInstance();
+    await databaseManager.init();
+    moduleManager.moduleInitialized('database');
 
     logger = createLogger('system');
 

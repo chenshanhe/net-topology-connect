@@ -23,6 +23,21 @@
 npm install
 ```
 
+### 数据库初始化
+
+首次拉取项目后，需要初始化数据库：
+
+```bash
+# 生成 Prisma 客户端
+npm run db:generate
+
+# 推送数据库结构到开发数据库
+npm run db:push
+
+# 更新默认数据库文件（用于打包）
+npm run db:update-default
+```
+
 ### 开发模式
 
 ```bash
@@ -60,6 +75,56 @@ net-topology-connect/
 └── package.json       # 项目配置
 ```
 
+## 数据库管理
+
+### 数据库结构
+
+项目使用 Prisma + SQLite 作为数据库，包含以下表：
+
+- **Scene** - 场景管理
+- **Device** - 设备信息
+- **Connection** - 设备连接关系
+- **ScanHistory** - 扫描历史记录
+
+### 数据库命令
+
+```bash
+# 生成 Prisma 客户端
+npm run db:generate
+
+# 推送数据库结构（开发用）
+npm run db:push
+
+# 创建数据库迁移
+npm run db:migrate
+
+# 打开数据库管理界面
+npm run db:studio
+
+# 重置数据库
+npm run db:reset
+
+# 更新默认数据库文件
+npm run db:update-default
+
+# 检查数据库状态
+npm run db:check
+```
+
+### 数据库更新流程
+
+当修改 `prisma/schema.prisma` 文件后：
+
+```bash
+# 方法1：推送模式（推荐开发使用）
+npm run db:push
+
+# 方法2：迁移模式（推荐生产使用）
+npm run db:migrate
+```
+
+两种方法都会自动更新 `assets/database/default.db` 和 `assets/database/dev.db` 文件。
+
 ## 开发指南
 
 ### 主进程开发
@@ -70,6 +135,7 @@ net-topology-connect/
 - 窗口创建和管理
 - 系统级 API 调用
 - IPC 通信
+- 数据库管理
 
 ### 渲染进程开发
 
@@ -88,19 +154,73 @@ net-topology-connect/
 
 ## 构建和分发
 
-### 本地构建
+### 完整打包流程
+
+#### 1. 预打包检查
 
 ```bash
+# 检查数据库状态
+npm run db:check
+
+# 如果数据库需要更新
+npm run db:update-default
+```
+
+#### 2. 构建应用
+
+```bash
+# 构建主进程和渲染进程
+npm run build
+```
+
+#### 3. 打包应用
+
+```bash
+# 生成安装包（包含数据库文件）
 npm run package
 ```
 
-构建产物将输出到 `release/build/` 目录。
+#### 4. 验证打包结果
+
+```bash
+# 检查构建产物
+ls release/build/
+
+# 检查数据库文件是否包含
+ls release/build/win-unpacked/resources/assets/database/
+```
+
+**注意**: 打包过程中可能会有 DLL 构建警告，这是正常的，不影响最终安装包。
+
+### 数据库文件说明
+
+- **开发环境**: `prisma/net-topology-connect.db` - 开发时使用的数据库
+- **默认数据库**: `assets/database/default.db` - 打包时包含的默认数据库
+- **开发数据库**: `assets/database/dev.db` - 开发环境数据库（不包含在打包中）
 
 ### 平台特定构建
 
 - **Windows**: 生成 NSIS 安装包
 - **macOS**: 生成 DMG 镜像
 - **Linux**: 生成 AppImage
+
+### 打包产物说明
+
+构建完成后，在 `release/build/` 目录下会生成：
+
+- **Windows**: `NetTopologyConnect Setup 0.0.1.exe` - 安装程序
+- **macOS**: `NetTopologyConnect-0.0.1.dmg` - 磁盘镜像
+- **Linux**: `NetTopologyConnect-0.0.1.AppImage` - 可执行文件
+
+### 安装包特性
+
+#### Windows 安装包特性
+
+- ✅ **用户可选择安装路径** - 允许用户自定义安装目录
+- ✅ **桌面快捷方式** - 自动创建桌面快捷方式
+- ✅ **开始菜单快捷方式** - 添加到开始菜单
+- ✅ **自定义图标** - 使用项目图标
+- ✅ **数据库文件包含** - 默认数据库文件已包含在安装包中
 
 ## 贡献指南
 

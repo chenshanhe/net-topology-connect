@@ -27,3 +27,21 @@ npm-debug.log.*
 *.css.d.ts
 *.sass.d.ts
 *.scss.d.ts
+
+/src/generated/prisma
+
+# Prisma 数据库文件
+prisma/*.db
+prisma/migrations/
+*.db
+*.sqlite
+*.sqlite3
+
+# 但保留默认数据库文件
+!assets/database/default.db
+!assets/database/dev.db
+!assets/database/.last-update
+
+# 开发环境配置
+.env.local
+.env.development

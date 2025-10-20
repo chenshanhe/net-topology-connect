@@ -1,5 +1,6 @@
-import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
+import { MemoryRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import icon from '../../assets/icon.svg';
+import Connect from './pages/Connect';
 import './App.css';
 
 function Hello() {
@@ -8,7 +9,7 @@ function Hello() {
       <div className="Hello">
         <img width="200" alt="icon" src={icon} />
       </div>
-      <h1>electron-react-boilerplate</h1>
+      <h1>NetTopologyConnect</h1>
       <div className="Hello">
         <a
           href="https://electron-react-boilerplate.js.org/"
@@ -22,18 +23,14 @@ function Hello() {
             Read our docs
           </button>
         </a>
-        <a
-          href="https://github.com/sponsors/electron-react-boilerplate"
-          target="_blank"
-          rel="noreferrer"
-        >
+        <Link to="/connect">
           <button type="button">
-            <span role="img" aria-label="folded hands">
-              🙏
+            <span role="img" aria-label="network">
+              🌐
             </span>
-            Donate
+            Connect
           </button>
-        </a>
+        </Link>
       </div>
     </div>
   );
@@ -44,6 +41,7 @@ export default function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Hello />} />
+        <Route path="/connect" element={<Connect />} />
       </Routes>
     </Router>
   );

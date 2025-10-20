@@ -38,7 +38,16 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "format:staged": "prettier --write",
-    "prepare": "husky"
+    "prepare": "husky",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push && npm run db:update-default",
+    "db:migrate": "prisma migrate dev && npm run db:update-default",
+    "db:studio": "npx prisma studio",
+    "db:reset": "prisma migrate reset",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "db:update-default": "node scripts/update-default-db.js",
+    "db:check": "node scripts/check-db-changes.js"
   },
   "browserslist": [
     "extends browserslist-config-erb"
@@ -91,6 +100,10 @@
   },
   "dependencies": {
     "@electron/notarize": "^3.0.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/xterm": "^5.5.0",
     "dayjs": "^1.11.18",
     "electron-debug": "^4.1.0",
     "electron-log": "^5.3.2",
@@ -98,9 +111,12 @@
     "lodash": "^4.17.21",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.3.0"
+    "react-router-dom": "^7.3.0",
+    "xterm": "^5.3.0"
   },
   "devDependencies": {
+    "@prisma/client": "^6.17.1",
+    "prisma": "^6.17.1",
     "@electron/rebuild": "^3.7.1",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
     "@svgr/webpack": "^8.1.0",
@@ -212,8 +228,23 @@
     },
     "win": {
       "target": [
-        "nsis"
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
       ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "NetTopologyConnect"
     },
     "linux": {
       "target": [
@@ -227,10 +258,30 @@
       "output": "release/build"
     },
     "extraResources": [
-      "./assets/**",
-      "!./assets/etc/dev.json",
-      "!./assets/etc/*.json",
-      "./assets/etc/default.json"
+      {
+        "from": "assets",
+        "to": "assets",
+        "filter": [
+          "**/*",
+          "!etc/**",
+          "!database/**",
+          "etc/default.json",
+          "database/default.db",
+          "icon.*",
+          "icons/**",
+          "entitlements.mac.plist",
+          "assets.d.ts"
+        ]
+      }
+    ],
+    "files": [
+      "!assets/etc/dev.json",
+      "!assets/database/dev.db",
+      "!prisma/*.db",
+      "!prisma/migrations/**",
+      "!src/**/*.test.*",
+      "!src/**/*.spec.*",
+      "!**/__tests__/**"
     ],
     "publish": {
       "provider": "github",

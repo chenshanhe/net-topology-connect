@@ -13,6 +13,12 @@ export class ModuleManager {
       initStatus: ModuleInitStatus.READY,
     },
     {
+      name: 'database',
+      description: 'Database',
+      initStatus: ModuleInitStatus.READY,
+    },
+
+    {
       name: 'window',
       description: 'WindowManager',
       initStatus: ModuleInitStatus.SKIPPED,

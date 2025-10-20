@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./net-topology-connect.db"
+}
+
+
+model Scene {
+  uuid        String     @id @default(uuid())
+  name        String
+}
+
+model Device {
+  id          Int      @id @default(autoincrement())
+  name        String
+  ipAddress   String   @map("ip_address")
+  macAddress  String?  @map("mac_address")
+  deviceType  String?  @map("device_type")
+  status      String   @default("unknown")
+  lastSeen    DateTime? @map("last_seen")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // 关系
+  sourceConnections Connection[] @relation("SourceDevice")
+  targetConnections Connection[] @relation("TargetDevice")
+
+  @@map("devices")
+}
+
+model Connection {
+  id              Int      @id @default(autoincrement())
+  sourceDeviceId  Int      @map("source_device_id")
+  targetDeviceId  Int      @map("target_device_id")
+  connectionType  String?  @map("connection_type")
+  bandwidth       String?
+  latency         Int?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // 关系
+  sourceDevice Device @relation("SourceDevice", fields: [sourceDeviceId], references: [id])
+  targetDevice Device @relation("TargetDevice", fields: [targetDeviceId], references: [id])
+
+  @@map("connections")
+}
+
+model ScanHistory {
+  id            Int      @id @default(autoincrement())
+  scanType      String   @map("scan_type")
+  targetRange   String?  @map("target_range")
+  devicesFound  Int      @default(0) @map("devices_found")
+  scanDuration  Int?     @map("scan_duration")
+  status        String   @default("completed")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("scan_history")
+}
