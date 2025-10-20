@@ -34,7 +34,11 @@
     "start:main": "concurrently -k -P \"cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --watch --config ./.erb/configs/webpack.config.main.dev.ts\" \"electronmon . -- {@}\" --",
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true NODE_OPTIONS=\"-r ts-node/register --no-warnings\" webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
-    "test": "jest"
+    "test": "jest",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "format:staged": "prettier --write",
+    "prepare": "husky"
   },
   "browserslist": [
     "extends browserslist-config-erb"
@@ -87,9 +91,11 @@
   },
   "dependencies": {
     "@electron/notarize": "^3.0.0",
+    "dayjs": "^1.11.18",
     "electron-debug": "^4.1.0",
     "electron-log": "^5.3.2",
     "electron-updater": "^6.3.9",
+    "lodash": "^4.17.21",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.3.0"
@@ -104,6 +110,7 @@
     "@types/aria-query": "^5.0.4",
     "@types/babel__core": "^7.20.5",
     "@types/jest": "^29.5.14",
+    "@types/lodash": "^4.17.20",
     "@types/node": "22.13.10",
     "@types/react": "^19.0.11",
     "@types/react-dom": "^19.0.4",
@@ -137,9 +144,11 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.6.3",
+    "husky": "^9.1.7",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "lint-staged": "^16.2.4",
     "mini-css-extract-plugin": "^2.9.2",
     "prettier": "^3.5.3",
     "react-refresh": "^0.16.0",
@@ -218,13 +227,25 @@
       "output": "release/build"
     },
     "extraResources": [
-      "./assets/**"
+      "./assets/**",
+      "!./assets/etc/dev.json",
+      "!./assets/etc/*.json",
+      "./assets/etc/default.json"
     ],
     "publish": {
       "provider": "github",
       "owner": "electron-react-boilerplate",
       "repo": "electron-react-boilerplate"
     }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css,scss}": [
+      "prettier --write"
+    ]
   },
   "devEngines": {
     "runtime": {

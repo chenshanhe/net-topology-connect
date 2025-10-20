@@ -63,19 +63,24 @@ net-topology-connect/
 ## 开发指南
 
 ### 主进程开发
+
 主进程代码位于 `src/main/` 目录，负责：
+
 - 应用程序生命周期管理
 - 窗口创建和管理
 - 系统级 API 调用
 - IPC 通信
 
 ### 渲染进程开发
+
 渲染进程代码位于 `src/renderer/` 目录，负责：
+
 - 用户界面展示
 - 用户交互处理
 - 与主进程通信
 
 ### 添加新功能
+
 1. 在 `src/renderer/` 中创建 React 组件
 2. 在 `src/main/` 中添加必要的 IPC 处理
 3. 更新路由配置
@@ -84,6 +89,7 @@ net-topology-connect/
 ## 构建和分发
 
 ### 本地构建
+
 ```bash
 npm run package
 ```
@@ -91,6 +97,7 @@ npm run package
 构建产物将输出到 `release/build/` 目录。
 
 ### 平台特定构建
+
 - **Windows**: 生成 NSIS 安装包
 - **macOS**: 生成 DMG 镜像
 - **Linux**: 生成 AppImage
