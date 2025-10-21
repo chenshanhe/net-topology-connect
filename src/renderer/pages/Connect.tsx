@@ -2,7 +2,7 @@ import React from 'react';
 import Terminal from '../components/Terminal';
 
 function Connect() {
-
+  const connId = '1234567890';
   return (
     <div
       style={{
@@ -37,9 +37,7 @@ function Connect() {
           flexDirection: 'column',
         }}
       >
-        <Terminal
-          className="connect-terminal"
-        />
+        <Terminal className="connect-terminal" connId={connId} />
       </div>
     </div>
   );
