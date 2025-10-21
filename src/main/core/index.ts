@@ -59,6 +59,11 @@ export const ipcInit = () => {
       logger?.info(msgTemplate(arg));
       event.reply('ipc-example', msgTemplate('pong'));
     });
+    ipcMain.on('terminal.input', async (event, arg) => {
+      console.log('Renderer Terminal input:',event, arg);
+    });
+
+
 
     logger?.info('IPC initialized');
   } catch (error) {

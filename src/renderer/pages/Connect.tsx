@@ -2,13 +2,6 @@ import React from 'react';
 import Terminal from '../components/Terminal';
 
 function Connect() {
-  const handleData = (data: string) => {
-    console.log('Terminal input:', data);
-  };
-
-  const handleKey = (key: string) => {
-    console.log('Key pressed:', key);
-  };
 
   return (
     <div
@@ -46,8 +39,6 @@ function Connect() {
       >
         <Terminal
           className="connect-terminal"
-          onData={handleData}
-          onKey={handleKey}
         />
       </div>
     </div>

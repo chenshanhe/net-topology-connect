@@ -14,7 +14,13 @@
     "allowJs": true,
     "outDir": ".erb/dll",
     "skipLibCheck": true,
-    "typeRoots": ["./node_modules/@types"]
+    "typeRoots": ["./node_modules/@types"],
+    "baseUrl": "./src",
+    "paths": {
+      "@shared/*": ["shared/*"],
+      "@main/*": ["main/*"],
+      "@renderer/*": ["renderer/*"]
+    }
   },
   "exclude": ["test", "release/build", "release/app/dist", ".erb/dll"]
 }

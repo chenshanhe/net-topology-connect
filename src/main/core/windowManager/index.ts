@@ -80,6 +80,10 @@ export class WindowManager {
     return this._windows[windowName];
   }
 
+  public createMainWindow = () => {
+    this.createWindow('_main', 1200, 800);
+  };
+
   private _installExtensions = async () => {
     const installer = require('electron-devtools-installer');
     const forceDownload = !!process.env.UPGRADE_EXTENSIONS;

@@ -45,3 +45,5 @@ prisma/migrations/
 # 开发环境配置
 .env.local
 .env.development
+
+dist

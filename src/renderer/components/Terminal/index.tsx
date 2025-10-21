@@ -2,17 +2,14 @@ import React, { useEffect, useRef } from 'react';
 import { Terminal as XTerm } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import '@xterm/xterm/css/xterm.css';
-
+import { TerminalInputData } from '@shared/types';
+import dayjs from 'dayjs';
 interface TerminalProps {
   className: string;
-  onData: (data: string) => void;
-  onKey: (key: string) => void;
 }
 
 function Terminal({
   className = '',
-  onData = () => {},
-  onKey = () => {},
 }: TerminalProps) {
   const terminalRef = useRef<HTMLDivElement>(null);
   const xtermRef = useRef<XTerm | null>(null);
@@ -49,12 +46,20 @@ function Terminal({
 
     // 监听数据输入
     terminal.onData((data) => {
-      onData?.(data);
+      console.log('Terminal input:', data);
+      terminal.write(data);
+      const event:TerminalInputData = {
+        connId:'1234567890',
+        type: 'input',
+        timestamp: dayjs().valueOf(),
+        content: data
+      }
+      window.electron.ipcRenderer.sendMessage('terminal.input', event);
     });
 
     // 监听按键
     terminal.onKey(({ key }) => {
-      onKey?.(key);
+      console.log('Key pressed:', key);
     });
 
     // 初始欢迎信息
@@ -67,7 +72,7 @@ function Terminal({
     return () => {
       terminal.dispose();
     };
-  }, [onData, onKey]);
+  });
 
   // 窗口大小变化时重新调整
   useEffect(() => {
