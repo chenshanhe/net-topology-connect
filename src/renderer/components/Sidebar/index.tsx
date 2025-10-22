@@ -13,7 +13,6 @@ import {
   IconButton,
   Menu,
   MenuItem as MuiMenuItem,
-  Chip,
   Tooltip,
 } from '@mui/material';
 import {
@@ -30,6 +29,10 @@ import {
   ChevronLeft,
   ChevronRight,
 } from '@mui/icons-material';
+import RecentConnections, {
+  RecentConnection,
+  RecentConnectionsHover,
+} from './RecentConnections';
 
 interface SidebarProps {
   width: number;
@@ -37,20 +40,38 @@ interface SidebarProps {
   onToggleCollapse?: () => void;
 }
 
-interface MenuItem {
+// 菜单类型枚举
+export enum MenuItemType {
+  SIMPLE = 'simple', // 普通菜单，无子菜单
+  DROPDOWN = 'dropdown', // 有子菜单的菜单
+  COMPONENT = 'component', // 有子组件的菜单（如快速连接）
+}
+
+// 子组件配置
+export interface SubComponentConfig {
+  type: 'recent-connections' | 'custom';
+  data?: RecentConnection[];
+  component?: React.ComponentType<any>;
+}
+
+// 操作按钮配置
+export interface ActionConfig {
+  icon: React.ReactNode;
+  tooltip: string;
+  onClick: () => void;
+}
+
+// 菜单项接口
+export interface MenuItem {
   id: string;
   label: string;
   icon: React.ReactNode;
   path: string;
-  children?: MenuItem[];
-  isQuickConnect?: boolean;
-  recentConnections?: Array<{
-    id: string;
-    name: string;
-    host: string;
-    port: number;
-    type: string;
-  }>;
+  type: MenuItemType;
+  children?: MenuItem[]; // 子菜单（dropdown类型使用）
+  subComponent?: SubComponentConfig; // 子组件配置（component类型使用）
+  actions?: ActionConfig[]; // 操作按钮（component类型使用）
+  tooltip?: string; // 自定义tooltip
 }
 
 const menuItems: MenuItem[] = [
@@ -59,32 +80,93 @@ const menuItems: MenuItem[] = [
     label: '首页',
     icon: <Home />,
     path: '/',
+    type: MenuItemType.SIMPLE,
   },
   {
-    id: '拓扑',
+    id: 'topology',
     label: '拓扑',
     icon: <Hub />,
     path: '/topology',
+    type: MenuItemType.SIMPLE,
   },
   {
-    id: '快速连接',
+    id: 'quick-connect',
     label: '快速连接',
     icon: <OfflineBolt />,
     path: '/quick-connect',
-    isQuickConnect: true,
-    recentConnections: [], // 默认没有最近连接
+    type: MenuItemType.COMPONENT,
+    subComponent: {
+      type: 'recent-connections',
+      data: [
+        {
+          id: '1',
+          name: '测试服务器',
+          host: '192.168.1.100',
+          port: 22,
+          type: 'SSH',
+        },
+        {
+          id: '2',
+          name: '开发服务器',
+          host: '192.168.1.101',
+          port: 22,
+          type: 'SSH',
+        },
+      ], // 示例数据
+    },
+    actions: [
+      {
+        icon: <Clear fontSize="small" />,
+        tooltip: '清空记录',
+        onClick: () => {
+          // 清空记录逻辑
+        },
+      },
+      {
+        icon: <ListIcon fontSize="small" />,
+        tooltip: '查看完整记录',
+        onClick: () => {
+          // 查看完整记录逻辑
+        },
+      },
+    ],
   },
   {
     id: 'settings',
     label: '设置',
     icon: <Settings />,
     path: '/settings',
+    type: MenuItemType.SIMPLE,
   },
   {
     id: 'help',
     label: '帮助',
     icon: <Help />,
     path: '/help',
+    type: MenuItemType.SIMPLE,
+  },
+  {
+    id: 'topology1',
+    label: '拓扑',
+    icon: <Hub />,
+    path: '/topology',
+    type: MenuItemType.DROPDOWN,
+    children: [
+      {
+        id: 'topology-a',
+        label: '子菜单A',
+        icon: <Hub />,
+        path: '/topology/a',
+        type: MenuItemType.SIMPLE,
+      },
+      {
+        id: 'topology-b',
+        label: '子菜单B',
+        icon: <Hub />,
+        path: '/topology/b',
+        type: MenuItemType.SIMPLE,
+      },
+    ],
   },
 ];
 
@@ -116,25 +198,14 @@ function Sidebar({
     // setSelectedItem(null);
   };
 
-  const handleClearRecent = () => {
-    // 清空最近连接记录的逻辑
-    // console.log('清空最近连接记录');
-    handleMenuClose();
-  };
-
-  const handleOpenConnectionList = () => {
-    // 打开连接列表的逻辑
-    // console.log('打开连接列表');
-    handleMenuClose();
-  };
-
   const renderMenuItem = (item: MenuItem, level = 0) => {
     const hasChildren = item.children && item.children.length > 0;
-    const hasRecentConnections =
-      item.isQuickConnect &&
-      item.recentConnections &&
-      item.recentConnections.length > 0;
-    const isQuickConnectMenu = item.isQuickConnect; // 快速连接菜单始终可以展开
+    const hasSubComponent =
+      item.type === MenuItemType.COMPONENT && item.subComponent;
+    const hasActions = item.actions && item.actions.length > 0;
+    const isExpandable =
+      item.type === MenuItemType.DROPDOWN ||
+      item.type === MenuItemType.COMPONENT;
     const isOpen = openItems.includes(item.id);
     const isHovered = hoveredItem === item.id;
     const paddingLeft = level * 2 + 1;
@@ -143,19 +214,21 @@ function Sidebar({
       <React.Fragment key={item.id}>
         <ListItem disablePadding sx={{ position: 'relative' }}>
           <Tooltip
-            title={item.label}
+            title={item.tooltip || item.label}
             placement="right"
-            disableHoverListener={!collapsed || item.isQuickConnect}
-            disableFocusListener={!collapsed || item.isQuickConnect}
-            disableTouchListener={!collapsed || item.isQuickConnect}
+            disableHoverListener={!collapsed || isExpandable}
+            disableFocusListener={!collapsed || isExpandable}
+            disableTouchListener={!collapsed || isExpandable}
           >
             <ListItemButton
               onClick={() => {
-                if (item.isQuickConnect) {
-                  // 快速连接切换展开/收起状态
+                if (isExpandable) {
+                  // 可展开菜单切换展开/收起状态
                   handleToggle(item.id);
-                } else if (hasChildren) {
-                  handleToggle(item.id);
+                } else if (item.type === MenuItemType.SIMPLE) {
+                  // 普通菜单直接跳转
+                  // 导航到指定路径
+                  // navigate(item.path);
                 }
               }}
               onMouseEnter={() => setHoveredItem(item.id)}
@@ -216,9 +289,7 @@ function Sidebar({
               )}
               {!collapsed && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  {(hasChildren || isQuickConnectMenu) &&
-                    (isOpen ? <ArrowDropDown /> : <ArrowDropUp />)}
-                  {item.isQuickConnect && (
+                  {hasActions && (
                     <IconButton
                       size="small"
                       onClick={handleMenuClick}
@@ -230,10 +301,12 @@ function Sidebar({
                       <MoreVert fontSize="small" />
                     </IconButton>
                   )}
+                  {isExpandable &&
+                    (isOpen ? <ArrowDropDown /> : <ArrowDropUp />)}
                 </Box>
               )}
               {/* 收起状态下的悬停菜单 */}
-              {collapsed && isHovered && item.isQuickConnect && (
+              {collapsed && isHovered && isExpandable && (
                 <Box
                   data-hover-menu
                   onMouseEnter={() => setHoveredItem(item.id)}
@@ -251,6 +324,21 @@ function Sidebar({
                     boxShadow: 3,
                     minWidth: 200,
                     maxWidth: 300,
+                    maxHeight: '400px',
+                    overflow: 'auto',
+                    '&::-webkit-scrollbar': {
+                      width: '4px',
+                    },
+                    '&::-webkit-scrollbar-track': {
+                      background: 'transparent',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                      background: 'rgba(0, 0, 0, 0.2)',
+                      borderRadius: '2px',
+                    },
+                    '&::-webkit-scrollbar-thumb:hover': {
+                      background: 'rgba(0, 0, 0, 0.3)',
+                    },
                   }}
                 >
                   <Box sx={{ p: 1 }}>
@@ -260,18 +348,24 @@ function Sidebar({
 
                     <Divider sx={{ mb: 1 }} />
 
-                    {/* 最近连接列表 */}
-                    {hasRecentConnections &&
-                      item.recentConnections?.map((connection) => (
+                    {/* 子菜单内容 */}
+                    {item.type === MenuItemType.DROPDOWN &&
+                      hasChildren &&
+                      item.children?.map((child) => (
                         <Box
-                          key={connection.id}
+                          key={child.id}
                           sx={{
                             p: 1,
                             mb: 0.5,
                             borderRadius: 1,
+                            cursor: 'pointer',
                             '&:hover': {
                               backgroundColor: 'action.hover',
                             },
+                          }}
+                          onClick={() => {
+                            // 导航到子菜单
+                            // navigate(child.path);
                           }}
                         >
                           <Box
@@ -279,154 +373,86 @@ function Sidebar({
                               display: 'flex',
                               alignItems: 'center',
                               gap: 1,
-                              mb: 0.5,
                             }}
                           >
-                            <Typography
-                              variant="body2"
-                              sx={{ fontWeight: 500 }}
-                            >
-                              {connection.name}
+                            {child.icon}
+                            <Typography variant="body2">
+                              {child.label}
                             </Typography>
-                            <Chip
-                              label={connection.type}
-                              size="small"
-                              color="primary"
-                              variant="outlined"
-                            />
                           </Box>
-                          <Typography variant="caption" color="text.secondary">
-                            {connection.host}:{connection.port}
-                          </Typography>
                         </Box>
                       ))}
 
-                    {/* 没有最近连接时的提示 */}
-                    {item.isQuickConnect &&
-                      (!item.recentConnections ||
-                        item.recentConnections.length === 0) && (
-                        <Box
-                          sx={{
-                            p: 2,
-                            textAlign: 'center',
+                    {/* 子组件内容 */}
+                    {item.type === MenuItemType.COMPONENT &&
+                      hasSubComponent &&
+                      item.subComponent?.type === 'recent-connections' && (
+                        <RecentConnectionsHover
+                          connections={item.subComponent.data || []}
+                          onConnectionClick={() => {
+                            // 处理连接点击
+                            // handleConnectionClick(connection);
                           }}
-                        >
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ fontStyle: 'italic' }}
-                          >
-                            最近没有快速连接
-                          </Typography>
-                        </Box>
+                        />
                       )}
 
                     {/* 操作按钮 */}
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        gap: 1,
-                        mt: 1,
-                        pt: 1,
-                        borderTop: '1px solid',
-                        borderColor: 'divider',
-                        justifyContent: 'flex-end',
-                      }}
-                    >
-                      <Tooltip title="清空记录" placement="top">
-                        <IconButton
-                          size="small"
-                          onClick={handleClearRecent}
-                          sx={{ color: 'text.secondary' }}
-                        >
-                          <Clear fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="查看完整记录" placement="top">
-                        <IconButton
-                          size="small"
-                          onClick={handleOpenConnectionList}
-                          sx={{ color: 'text.secondary' }}
-                        >
-                          <ListIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
+                    {hasActions && (
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          gap: 1,
+                          mt: 1,
+                          pt: 1,
+                          borderTop: '1px solid',
+                          borderColor: 'divider',
+                          justifyContent: 'flex-end',
+                        }}
+                      >
+                        {item.actions?.map((action) => (
+                          <Tooltip
+                            key={`${item.id}-action-${action.tooltip}`}
+                            title={action.tooltip}
+                            placement="top"
+                          >
+                            <IconButton
+                              size="small"
+                              onClick={action.onClick}
+                              sx={{ color: 'text.secondary' }}
+                            >
+                              {action.icon}
+                            </IconButton>
+                          </Tooltip>
+                        ))}
+                      </Box>
+                    )}
                   </Box>
                 </Box>
               )}
             </ListItemButton>
           </Tooltip>
         </ListItem>
-        {(hasChildren || isQuickConnectMenu) && !collapsed && (
+        {isExpandable && !collapsed && (
           <Collapse in={isOpen} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              {hasRecentConnections &&
-                item.recentConnections?.map((connection) => (
-                  <ListItem key={connection.id} disablePadding>
-                    <ListItemButton
-                      sx={{
-                        pl: paddingLeft + 2,
-                        py: 0.5,
-                        '&:hover': {
-                          backgroundColor: 'action.hover',
-                        },
-                      }}
-                    >
-                      <ListItemText
-                        primary={
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 1,
-                            }}
-                          >
-                            <Typography
-                              variant="body2"
-                              sx={{ fontWeight: 500 }}
-                            >
-                              {connection.name}
-                            </Typography>
-                            <Chip
-                              label={connection.type}
-                              size="small"
-                              color="primary"
-                              variant="outlined"
-                            />
-                          </Box>
-                        }
-                        secondary={`${connection.host}:${connection.port}`}
-                        secondaryTypographyProps={{ fontSize: '0.75rem' }}
-                      />
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-              {item.isQuickConnect &&
-                (!item.recentConnections ||
-                  item.recentConnections.length === 0) && (
-                  <ListItem disablePadding>
-                    <Box
-                      sx={{
-                        pl: paddingLeft + 2,
-                        py: 2,
-                        px: 2,
-                        width: '100%',
-                        textAlign: 'center',
-                      }}
-                    >
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ fontStyle: 'italic' }}
-                      >
-                        最近没有快速连接
-                      </Typography>
-                    </Box>
-                  </ListItem>
-                )}
-              {hasChildren &&
+              {/* 子菜单渲染 */}
+              {item.type === MenuItemType.DROPDOWN &&
+                hasChildren &&
                 item.children?.map((child) => renderMenuItem(child, level + 1))}
+
+              {/* 子组件渲染 */}
+              {item.type === MenuItemType.COMPONENT &&
+                hasSubComponent &&
+                item.subComponent?.type === 'recent-connections' && (
+                  <RecentConnections
+                    connections={item.subComponent.data || []}
+                    onConnectionClick={() => {
+                      // 处理连接点击
+                      // handleConnectionClick(connection);
+                    }}
+                    paddingLeft={paddingLeft}
+                  />
+                )}
             </List>
           </Collapse>
         )}
@@ -465,7 +491,26 @@ function Sidebar({
 
       <Divider />
 
-      <List sx={{ px: 1, flex: 1, overflow: 'visible' }}>
+      <List
+        sx={{
+          px: 1,
+          flex: 1,
+          overflow: 'auto',
+          '&::-webkit-scrollbar': {
+            width: '6px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'rgba(255, 255, 255, 0.2)',
+            borderRadius: '3px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            background: 'rgba(255, 255, 255, 0.3)',
+          },
+        }}
+      >
         {menuItems.map((item) => renderMenuItem(item))}
       </List>
 
@@ -490,7 +535,7 @@ function Sidebar({
         </IconButton>
       </Box>
 
-      {/* 快速连接菜单 */}
+      {/* 操作菜单 */}
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -504,30 +549,26 @@ function Sidebar({
           horizontal: 'left',
         }}
       >
-        <MuiMenuItem onClick={handleClearRecent}>
-          <ListItemIcon>
-            <Clear fontSize="small" />
-          </ListItemIcon>
-          <ListItemText
-            primary="清空记录"
-            primaryTypographyProps={{
-              fontSize: '0.875rem',
-              fontWeight: 500,
-            }}
-          />
-        </MuiMenuItem>
-        <MuiMenuItem onClick={handleOpenConnectionList}>
-          <ListItemIcon>
-            <ListIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText
-            primary="查看完整记录"
-            primaryTypographyProps={{
-              fontSize: '0.875rem',
-              fontWeight: 500,
-            }}
-          />
-        </MuiMenuItem>
+        {menuItems
+          .find((item) => item.actions && item.actions.length > 0)
+          ?.actions?.map((action) => (
+            <MuiMenuItem
+              key={`menu-${action.tooltip}`}
+              onClick={() => {
+                action.onClick();
+                handleMenuClose();
+              }}
+            >
+              <ListItemIcon>{action.icon}</ListItemIcon>
+              <ListItemText
+                primary={action.tooltip}
+                primaryTypographyProps={{
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                }}
+              />
+            </MuiMenuItem>
+          ))}
       </Menu>
     </Drawer>
   );
