@@ -20,8 +20,8 @@ let logger: any = null;
 
 export const init = async () => {
   await appInit();
-  eventInit();
-  ipcInit();
+  await eventInit();
+  await ipcInit();
 };
 
 export const appInit = async () => {
@@ -49,7 +49,7 @@ export const appInit = async () => {
   }
 };
 
-export const eventInit = () => {
+export const eventInit = async () => {
   try {
     // 初始化事件
     connectManager.on('CONNECT.RESPONSE.ERROR', (uuid, error) => {
@@ -74,10 +74,10 @@ export const eventInit = () => {
     console.error('Event initialization failed', error);
   }
 };
-import fs from 'fs';
-import path from 'path';
-import os from 'os';
-export const ipcInit = () => {
+// import fs from 'fs';
+// import path from 'path';
+// import os from 'os';
+export const ipcInit = async () => {
   try {
     // 初始化 IPC
     // ipcMain.on('ipc-example', async (event, arg) => {
@@ -94,21 +94,21 @@ export const ipcInit = () => {
       connectManager.sendCommand(arg.connId, arg.content);
     });
 
-    try {
-      connectManager.connect({
-        uuid: '1234567890',
-        host: '111.230.81.91',
-        port: 22,
-        username: 'ubuntu',
-        password: 'Amazing!',
-        privateKey: fs.readFileSync(
-          path.join(os.homedir(), '.ssh', 'id_ed25519'),
-          'utf8',
-        ),
-      });
-    } catch (error) {
-      console.error('Connection initialization failed', error);
-    }
+    // try {
+    //   connectManager.connect({
+    //     uuid: '1234567890',
+    //     host: '111.230.81.91',
+    //     port: 22,
+    //     username: 'ubuntu',
+    //     password: 'Amazing!',
+    //     privateKey: fs.readFileSync(
+    //       path.join(os.homedir(), '.ssh', 'id_ed25519'),
+    //       'utf8',
+    //     ),
+    //   });
+    // } catch (error) {
+    //   console.error('Connection initialization failed', error);
+    // }
 
     logger?.info('IPC initialized');
   } catch (error) {
