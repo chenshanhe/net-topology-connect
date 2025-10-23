@@ -28,6 +28,7 @@ import {
   ArrowDropDown,
   ChevronLeft,
   ChevronRight,
+  Bolt,
 } from '@mui/icons-material';
 import RecentConnections, {
   RecentConnection,
@@ -116,10 +117,10 @@ const menuItems: MenuItem[] = [
     },
     actions: [
       {
-        icon: <Clear fontSize="small" />,
-        tooltip: '清空记录',
+        icon: <Bolt fontSize="small" />,
+        tooltip: '新建连接',
         onClick: () => {
-          // 清空记录逻辑
+          // 新建连接逻辑
         },
       },
       {
@@ -127,6 +128,13 @@ const menuItems: MenuItem[] = [
         tooltip: '查看完整记录',
         onClick: () => {
           // 查看完整记录逻辑
+        },
+      },
+      {
+        icon: <Clear fontSize="small" />,
+        tooltip: '清空记录',
+        onClick: () => {
+          // 清空记录逻辑
         },
       },
     ],
@@ -145,29 +153,29 @@ const menuItems: MenuItem[] = [
     path: '/help',
     type: MenuItemType.SIMPLE,
   },
-  {
-    id: 'topology1',
-    label: '拓扑',
-    icon: <Hub />,
-    path: '/topology',
-    type: MenuItemType.DROPDOWN,
-    children: [
-      {
-        id: 'topology-a',
-        label: '子菜单A',
-        icon: <Hub />,
-        path: '/topology/a',
-        type: MenuItemType.SIMPLE,
-      },
-      {
-        id: 'topology-b',
-        label: '子菜单B',
-        icon: <Hub />,
-        path: '/topology/b',
-        type: MenuItemType.SIMPLE,
-      },
-    ],
-  },
+  // {
+  //   id: 'topology1',
+  //   label: '拓扑',
+  //   icon: <Hub />,
+  //   path: '/topology',
+  //   type: MenuItemType.DROPDOWN,
+  //   children: [
+  //     {
+  //       id: 'topology-a',
+  //       label: '子菜单A',
+  //       icon: <Hub />,
+  //       path: '/topology/a',
+  //       type: MenuItemType.SIMPLE,
+  //     },
+  //     {
+  //       id: 'topology-b',
+  //       label: '子菜单B',
+  //       icon: <Hub />,
+  //       path: '/topology/b',
+  //       type: MenuItemType.SIMPLE,
+  //     },
+  //   ],
+  // },
 ];
 
 function Sidebar({
