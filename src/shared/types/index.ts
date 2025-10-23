@@ -4,6 +4,9 @@ export type IPCChannels =
   | 'terminal.command'
   | 'terminal.response'
   | 'terminal.response.error'
+  | 'window:minimize'
+  | 'window:maximize'
+  | 'window:close'
   | `terminal.${string}.response`
   | `terminal.${string}.response.error`;
 

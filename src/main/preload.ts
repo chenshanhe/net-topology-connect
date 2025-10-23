@@ -6,6 +6,7 @@ import type { IPCChannels } from '../shared/types';
 export type Channels = IPCChannels;
 
 const electronHandler = {
+  platform: process.platform, // 暴露平台信息
   ipcRenderer: {
     sendMessage(channel: Channels, ...args: unknown[]) {
       ipcRenderer.send(channel, ...args);

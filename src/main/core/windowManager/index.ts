@@ -47,6 +47,8 @@ export class WindowManager {
       width: width,
       height: height,
       icon: getAssetPath('icon.png'),
+      frame: process.platform === 'darwin' ? false : false, // 所有平台都移除原生标题栏
+      titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined, // macOS 保留红绿灯，其他系统完全自定义
       webPreferences: {
         preload: app.isPackaged
           ? path.join(__dirname, 'preload.js')
@@ -65,8 +67,8 @@ export class WindowManager {
       }
     });
 
-    const menuBuilder = new MenuBuilder(newWindow);
-    menuBuilder.buildMenu();
+    // const menuBuilder = new MenuBuilder(newWindow);
+    // menuBuilder.buildMenu();
 
     // Open urls in the user's browser
     newWindow.webContents.setWindowOpenHandler((edata) => {

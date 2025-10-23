@@ -76,13 +76,13 @@ export interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
-  {
-    id: 'home',
-    label: '首页',
-    icon: <Home />,
-    path: '/',
-    type: MenuItemType.SIMPLE,
-  },
+  // {
+  //   id: 'home',
+  //   label: '首页',
+  //   icon: <Home />,
+  //   path: '/',
+  //   type: MenuItemType.SIMPLE,
+  // },
   {
     id: 'topology',
     label: '拓扑',
